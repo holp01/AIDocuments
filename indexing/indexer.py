@@ -1,51 +1,48 @@
 import os
-import pickle
+from whoosh.fields import Schema, TEXT, ID
+from whoosh.index import create_in, open_dir
+from whoosh.qparser import QueryParser
+from whoosh.writing import AsyncWriter
+from whoosh import qparser
+import pdb
 import re
-import pdb; 
 
-# Location to save the index
-INDEX_PATH = "C:\PythonAIFiles\index.pkl"
+# Define the schema for the index
+schema = Schema(title=ID(stored=True), content=TEXT(stored=True))
 
-# Initialize an inverted index as a dictionary
-# Example: {'word1': [post_id1, post_id3], 'word2': [post_id2, post_id3], ...}
-inverted_index = {}
+# Directory to save the Whoosh index
+INDEX_DIR  = "C:\PythonAIFiles\index.pkl"
 
-def tokenize(text):
-    """
-    Tokenizes a string into words. For simplicity, we'll split by non-alphanumeric characters.
-    """
-    return [word.lower() for word in re.findall(r'\w+', text)]
+def create_or_open_index(index_dir=INDEX_DIR):
+    """Create a new index or open an existing one."""
+    if not os.path.exists(index_dir):
+        os.mkdir(index_dir)
+        return create_in(index_dir, schema)
+    else:
+        return open_dir(index_dir)
 
-def update_index(content, post_id):
-    """
-    Tokenizes the content and updates the inverted index with the tokens.
-    """
-    global inverted_index
-
-    tokens = tokenize(content)
-    for token in tokens:
-        if token not in inverted_index:
-            inverted_index[token] = []
-        if post_id not in inverted_index[token]:
-            inverted_index[token].append(post_id)
-
-    # Optionally, save the index to disk so it can be loaded later
-    with open(INDEX_PATH, 'wb') as f:
-        pickle.dump(inverted_index, f)
-
+def update_index(content, topic):
+    """Add new content to the index or update existing content."""
+    # pdb.set_trace()
+    index = create_or_open_index()
+    writer = AsyncWriter(index)
+    writer.update_document(title=str(topic), content=content)
+    writer.commit()
+    
 def search_index(query):
-    """
-    Searches the inverted index for posts related to the query.
-    Returns a list of post_ids of matching posts.
-    """
-    tokens = tokenize(query)
-    matching_posts = []
+    """Search the index based on a query and return matching topics."""
+    index = create_or_open_index()
+    with index.searcher() as searcher:
+        sanitized_query = re.sub(r'[?]', '', query)  # Remove special characters like '?'
+        
+        query_parser = QueryParser("content", index.schema, group=qparser.OrGroup)
+        parsed_query = query_parser.parse(sanitized_query)
+        
+        print("Sanitized Query:", sanitized_query)
+        print("Parsed Query:", parsed_query)
+        
+        results = searcher.search(parsed_query, limit=None)  # Set limit=None to retrieve all matching results
+        print("Number of Hits:", len(results))
+        
+        return [hit["title"] for hit in results]
 
-    for token in tokens:
-        if token in inverted_index:
-            matching_posts.extend(inverted_index[token])
-
-    # Remove duplicates from the list
-    matching_posts = list(set(matching_posts))
-
-    return matching_posts
