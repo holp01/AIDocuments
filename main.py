@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from cache import cache_manager
+from azurehelper import azure_manager
 from indexing import indexer
 from pdf_extraction import extractor
 import openai
@@ -20,7 +20,7 @@ def ask():
     # Fetch and combine content of all matched documents as context
     context = ""
     for doc_id in matching_ids:
-        doc_content = cache_manager.get_cached_content(doc_id)
+        doc_content = azure_manager.get_cached_content(doc_id)
         print(doc_content)
         context += doc_content + "\n\n"
 
@@ -31,16 +31,16 @@ def ask():
 
 @app.route('/update', methods=['POST'])
 def update():
-    topic = request.json.get('topic')
+    arquiTip = request.json.get('arquiTip')
 
     # Step 1: Download and extract content
-    content = cache_manager.get_cached_content(topic)
+    content = azure_manager.get_cached_content(arquiTip)
     if not content:
-        content = download_and_extract_content(topic)  # Extract from .md
-        cache_manager.cache_content(content, topic)  # Cache the content
+        content = azure_manager.download_and_extract_content_from_azure(arquiTip)  # Extract from Azure Repos
+        azure_manager.cache_content_in_azure(content, arquiTip)  # Cache the content in Azure Blob Storage
 
     # Step 2: Update the index
-    indexer.update_index(content, topic)
+    indexer.update_index(content, arquiTip)
 
     return jsonify({"status": "Updated successfully"})
 
@@ -53,7 +53,7 @@ def ai_response(query, context):
     """
     print("Query: " + query)
     print("Context: " + context)
-    textAssist = "This is the information provided on the a document or more than one!\n\n Normaly the first line will be the title, or it might be in the middle if there's more than. Aswell for when it was published and who created it. Make sure to say reference the title as well who published it in the answer!\\Can you analyze it/them and make sure to answer accordingly please. Don't answer with anything else beside the information that matters!"
+    textAssist = "This is the information provided on the a document or more than one!\n\n Normaly the line with ArquiTips will be the title of the document(s)The author will be after By and the Date after Published. Make sure to say reference the title(s) as well who published it/them in the answer!\\Can you analyze it/them and make sure to answer accordingly please. Don't answer with anything else beside the information that matters!"
 
     try:
         response = openai.ChatCompletion.create(
@@ -78,7 +78,7 @@ def initialize():
     mdFiles = ["teste1", "teste2", "teste3"]
     for mdFile in mdFiles:
         title, content = download_and_extract_content(mdFile)
-        cache_manager.cache_content(content, mdFile)
+        azure_manager.cache_content(content, mdFile)
         indexer.update_index(title, content, mdFile)
 
 if __name__ == '__main__':
