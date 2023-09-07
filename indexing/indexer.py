@@ -4,11 +4,10 @@ from whoosh.index import create_in, open_dir
 from whoosh.qparser import QueryParser
 from whoosh.writing import AsyncWriter
 from whoosh import qparser
-import pdb
 import re
 
 # Define the schema for the index
-schema = Schema(title=ID(stored=True), content=TEXT(stored=True))
+schema = Schema(id =TEXT(stored=True),title=TEXT(stored=True), content=TEXT(stored=True))
 
 # Directory to save the Whoosh index
 INDEX_DIR  = "C:\PythonAIFiles\index.pkl"
@@ -21,12 +20,11 @@ def create_or_open_index(index_dir=INDEX_DIR):
     else:
         return open_dir(index_dir)
 
-def update_index(content, topic):
+def update_index(title, content, mdFile):
     """Add new content to the index or update existing content."""
-    # pdb.set_trace()
     index = create_or_open_index()
     writer = AsyncWriter(index)
-    writer.update_document(title=str(topic), content=content)
+    writer.update_document(id= mdFile, title=title, content=content)
     writer.commit()
     
 def search_index(query):
@@ -44,5 +42,5 @@ def search_index(query):
         results = searcher.search(parsed_query, limit=None)  # Set limit=None to retrieve all matching results
         print("Number of Hits:", len(results))
         
-        return [hit["title"] for hit in results]
+        return [hit["id"] for hit in results]
 

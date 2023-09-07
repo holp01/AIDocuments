@@ -1,3 +1,9 @@
-#Luis is 25 years old
+#ArquiTips 001 - How to download Client info from Network
 
-##Luis has green eyes
+Open google chrome
+Then go to www.network.com
+Click see files
+Click see more then press download
+
+By Luis Teixeira
+Published at 07/09/2023

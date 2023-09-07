@@ -1,3 +1,10 @@
-Luis lives in Porto
+ArquiTips 001 - How to add FO to Visual Code
 
-More specifically marco de canaveses
+Open VSCode
+Click see more
+Click see more extensions
+Search for arquiFO extension
+Click add
+
+By cristiano Ferro
+Publiushed at 11/12/2022

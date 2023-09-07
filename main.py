@@ -21,6 +21,7 @@ def ask():
     context = ""
     for doc_id in matching_ids:
         doc_content = cache_manager.get_cached_content(doc_id)
+        print(doc_content)
         context += doc_content + "\n\n"
 
     # Step 2: Send the combined context and the query to your AI model
@@ -52,7 +53,7 @@ def ai_response(query, context):
     """
     print("Query: " + query)
     print("Context: " + context)
-    textAssist = "This is the information provided on the a document, can you analyze it and make sure to answer accordingly please. Don't answer with anything else beside the information that matters!"
+    textAssist = "This is the information provided on the a document or more than one!\n\n Normaly the first line will be the title, or it might be in the middle if there's more than. Aswell for when it was published and who created it. Make sure to say reference the title as well who published it in the answer!\\Can you analyze it/them and make sure to answer accordingly please. Don't answer with anything else beside the information that matters!"
 
     try:
         response = openai.ChatCompletion.create(
@@ -76,9 +77,9 @@ def download_and_extract_content(topic):
 def initialize():
     mdFiles = ["teste1", "teste2", "teste3"]
     for mdFile in mdFiles:
-        content = download_and_extract_content(mdFile)
+        title, content = download_and_extract_content(mdFile)
         cache_manager.cache_content(content, mdFile)
-        indexer.update_index(content, mdFile)
+        indexer.update_index(title, content, mdFile)
 
 if __name__ == '__main__':
     initialize()  # Initialize and index at startup
