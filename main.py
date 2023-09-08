@@ -15,7 +15,7 @@ def ask():
     matching_ids = indexer.search_index(query)
     
     if not matching_ids:
-        return jsonify({"error": "No relevant context found"}), 400
+        return jsonify({"response": "I'm sorry, seems that the information you asked for is not present in ArquiTips! Try to rephrase please!"})
 
     # Fetch and combine content of all matched documents as context 
     context = ""
@@ -63,7 +63,7 @@ def ai_response(query, context):
     """
     print("Query: " + query)
     print("Context: " + context)
-    textAssist = "This is the information provided on the a document or more than one!\n\n Normaly the line with ArquiTips will be the title of the document(s)The author will be after By and the Date after Published. Make sure to say reference the title(s) as well who published it/them in the answer!\\Can you analyze it/them and make sure to answer accordingly please. Don't answer with anything else beside the information that matters!"
+    textAssist = "This is the information provided on the a document or more than one!\n\n Normally the line with ArquiTips will be the title of the document(s), the author will be after By and the Date after Published.\n\n Make sure to say reference the title(s) as well who published it/them in the answer!\n\nCan you analyze it/them and make sure to answer accordingly please. Don't answer with anything else beside the information that matters!"
 
     try:
         response = openai.ChatCompletion.create(
