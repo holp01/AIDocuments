@@ -17,7 +17,7 @@ def ask():
     if not matching_ids:
         return jsonify({"error": "No relevant context found"}), 400
 
-    # Fetch and combine content of all matched documents as context
+    # Fetch and combine content of all matched documents as context 
     context = ""
     for doc_id in matching_ids:
         doc_content = azure_manager.get_cached_content(doc_id)
