@@ -44,6 +44,16 @@ def update():
 
     return jsonify({"status": "Updated successfully"})
 
+@app.route('/update_all', methods=['POST'])
+def update_all():
+    mdFiles = azure_manager.list_all_md_files()
+    for mdFile in mdFiles:
+        title, content = download_and_extract_content(mdFile)
+        azure_manager.cache_content(content, mdFile)
+        indexer.update_index(title, content, mdFile)
+    return jsonify({"status": "All files updated successfully"})
+
+
 # Set up your API key (better to use environment variables in production)
 openai_api_key = os.environ.get('OPENAI_API_KEY')  # Make sure to keep this confidential
 openai.api_key = openai_api_key
@@ -74,14 +84,14 @@ def download_and_extract_content(topic):
     content = extractor.extract_from_md(file_path)
     return content
 
-def initialize():
-    mdFiles = ["teste1", "teste2", "teste3"]
-    for mdFile in mdFiles:
-        title, content = download_and_extract_content(mdFile)
-        azure_manager.cache_content(content, mdFile)
-        indexer.update_index(title, content, mdFile)
+# def initialize():
+#     mdFiles = ["teste1", "teste2", "teste3"]
+#     for mdFile in mdFiles:
+#         title, content = download_and_extract_content(mdFile)
+#         azure_manager.cache_content(content, mdFile)
+#         indexer.update_index(title, content, mdFile)
 
-initialize()
+# initialize()
 
 # if __name__ == '__main__':
 #     initialize()  # Initialize and index at startup

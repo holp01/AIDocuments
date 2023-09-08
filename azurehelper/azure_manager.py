@@ -49,3 +49,16 @@ def download_and_extract_content_from_azure(arquiTip):
     content = extractor.extract_from_md_content(content)
     
     return content
+
+def list_all_md_files():
+    personal_access_token = os.environ.get('AZURE_DEVOPS_PAT')
+    organization_url = os.environ.get('AZURE_DEVOPS_ORG_URL')
+    credentials = BasicAuthentication('', personal_access_token)
+    connection = Connection(base_url=organization_url, creds=credentials)
+    client = connection.clients.get_git_client()
+    
+    # Assuming your .md files are in the root of the repo
+    items = client.get_items(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), project=os.environ.get('AZURE_DEVOPS_PROJECT'))
+    
+    md_files = [item.path.split('/')[-1].replace('.md', '') for item in items if item.path.endswith('.md')]
+    return md_files
