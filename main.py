@@ -13,10 +13,11 @@ def ask():
     
     # Step 1: Search for relevant document identifiers based on user's query
     matching_ids = indexer.search_index(query)
-    
     if not matching_ids:
         return jsonify({"response": "I'm sorry, seems that the information you asked for is not present in ArquiTips! Try to rephrase please!"})
 
+    # Deduplicate matching_ids
+    matching_ids = list(set(matching_ids))
     # Fetch and combine content of all matched documents as context 
     context = ""
     for doc_id in matching_ids:
@@ -36,11 +37,11 @@ def update():
     # Step 1: Download and extract content
     content = azure_manager.get_cached_content(arquiTip)
     if not content:
-        content = azure_manager.download_and_extract_content_from_azure(arquiTip)  # Extract from Azure Repos
+        title, content = azure_manager.download_and_extract_content_from_azure(arquiTip)  # Extract from Azure Repos
         azure_manager.cache_content_in_azure(content, arquiTip)  # Cache the content in Azure Blob Storage
 
     # Step 2: Update the index
-    indexer.update_index(content, arquiTip)
+    indexer.update_index(title, content, arquiTip)
 
     return jsonify({"status": "Updated successfully"})
 
@@ -48,9 +49,16 @@ def update():
 def update_all():
     mdFiles = azure_manager.list_all_md_files()
     for mdFile in mdFiles:
-        title, content = download_and_extract_content(mdFile)
+        print(mdFile)
+        # Directly download and extract content from Azure Repos
+        title, content = azure_manager.download_and_extract_content_from_azure(mdFile)
+        
+        # Cache the content in Azure Blob Storage
         azure_manager.cache_content(content, mdFile)
-        indexer.update_index(title, content, mdFile)
+        
+        # Update the index
+        indexer.update_index(title, content, mdFile)  # Assuming mdFile is the title here, modify if needed
+
     return jsonify({"status": "All files updated successfully"})
 
 
@@ -85,7 +93,7 @@ def download_and_extract_content(topic):
     return content
 
 def initialize():
-    mdFiles = ["teste1", "teste2", "teste3","124BCAnalyzegroup"]
+    mdFiles = ["teste1", "teste2", "teste3"] ##,"124BCAnalyzegroup"
     for mdFile in mdFiles:
         title, content = download_and_extract_content(mdFile)
         azure_manager.cache_content(content, mdFile)
@@ -93,6 +101,6 @@ def initialize():
 
 initialize()
 
-# if __name__ == '__main__':
-#     initialize()  # Initialize and index at startup
-#     app.run(debug=True)
+if __name__ == '__main__':
+    initialize()  # Initialize and index at startup
+    app.run(debug=True)

@@ -9,13 +9,18 @@ import re
 # Define the schema for the index
 schema = Schema(id =TEXT(stored=True),title=TEXT(stored=True), content=TEXT(stored=True))
 
-# Directory to save the Whoosh index
-INDEX_DIR  = "C:\PythonAIFiles\index.pkl"
+# Check if we are in Azure App Service
+if os.environ.get('WEBSITE_SITE_NAME'):
+    # In Azure App Service. Use the local path for Linux-based App Service.
+    INDEX_DIR = "/home/data/whoosh_index"
+else:
+    # Local development or other environment. Use your previous path or another suitable path.
+    INDEX_DIR = "C:\PythonAIFiles\index.pkl"
 
 def create_or_open_index(index_dir=INDEX_DIR):
     """Create a new index or open an existing one."""
     if not os.path.exists(index_dir):
-        os.mkdir(index_dir)
+        os.makedirs(index_dir)
         return create_in(index_dir, schema)
     else:
         return open_dir(index_dir)

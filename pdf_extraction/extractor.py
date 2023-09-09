@@ -19,6 +19,12 @@ def extract_from_md(file_path):
     content = preprocess_md(content)
     return title, content
 
+def extract_from_md_content(content):
+    """Extract and preprocess content directly from a .md content string."""
+    title, content = split_title_and_content(content)
+    content = preprocess_md(content)
+    return title, content
+
 def split_title_and_content(content):
     lines = content.split("\n")
     title = lines[0].replace("#", "").strip()  # Assuming the title is the first line

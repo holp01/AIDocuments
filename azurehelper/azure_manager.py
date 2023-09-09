@@ -1,3 +1,4 @@
+import base64
 import os
 from azure.storage.blob import BlobServiceClient
 from azure.devops.connection import Connection
@@ -42,23 +43,32 @@ def download_and_extract_content_from_azure(arquiTip):
     client = connection.clients.get_git_client()
     file_content_stream = client.get_item_text(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), path=f'{arquiTip}.md', project=os.environ.get('AZURE_DEVOPS_PROJECT'))
     
-    # Convert stream to string
-    content = file_content_stream.read().decode('utf-8')
+    # Convert generator of bytes to string
+    content = ''.join(chunk.decode('utf-8') for chunk in file_content_stream)
     
     # Extract and preprocess content (assuming you have a function for this)
     content = extractor.extract_from_md_content(content)
     
     return content
 
+import requests
+
 def list_all_md_files():
     personal_access_token = os.environ.get('AZURE_DEVOPS_PAT')
     organization_url = os.environ.get('AZURE_DEVOPS_ORG_URL')
-    credentials = BasicAuthentication('', personal_access_token)
-    connection = Connection(base_url=organization_url, creds=credentials)
-    client = connection.clients.get_git_client()
-    
-    # Assuming your .md files are in the root of the repo
-    items = client.get_items(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), project=os.environ.get('AZURE_DEVOPS_PROJECT'))
-    
-    md_files = [item.path.split('/')[-1].replace('.md', '') for item in items if item.path.endswith('.md')]
+    project_name = os.environ.get('AZURE_DEVOPS_PROJECT')
+    repository_id = os.environ.get('AZURE_DEVOPS_REPO_ID')
+
+    # Construct the URL for the REST API endpoint
+    api_url = f"{organization_url}/{project_name}/_apis/git/repositories/{repository_id}/items?recursionLevel=full&versionDescriptor[versionType]=branch&versionDescriptor[version]=main&api-version=7.0"
+
+    headers = {
+        "Authorization": f"Basic {base64.b64encode((':' + personal_access_token).encode()).decode()}"
+    }
+
+    response = requests.get(api_url, headers=headers)
+    data = response.json()
+
+    md_files = [item['path'].split('/')[-1].replace('.md', '') for item in data['value'] if item['path'].endswith('.md')]
+    print(md_files)
     return md_files
