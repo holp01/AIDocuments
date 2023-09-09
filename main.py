@@ -99,8 +99,8 @@ def initialize():
         azure_manager.cache_content(content, mdFile)
         indexer.update_index(title, content, mdFile)
 
-initialize()
+# initialize()
 
-if __name__ == '__main__':
-    initialize()  # Initialize and index at startup
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     initialize()  # Initialize and index at startup
+#     app.run(debug=True)
