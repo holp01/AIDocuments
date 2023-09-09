@@ -84,14 +84,14 @@ def download_and_extract_content(topic):
     content = extractor.extract_from_md(file_path)
     return content
 
-# def initialize():
-#     mdFiles = ["teste1", "teste2", "teste3"]
-#     for mdFile in mdFiles:
-#         title, content = download_and_extract_content(mdFile)
-#         azure_manager.cache_content(content, mdFile)
-#         indexer.update_index(title, content, mdFile)
+def initialize():
+    mdFiles = ["teste1", "teste2", "teste3","124BCAnalyzegroup"]
+    for mdFile in mdFiles:
+        title, content = download_and_extract_content(mdFile)
+        azure_manager.cache_content(content, mdFile)
+        indexer.update_index(title, content, mdFile)
 
-# initialize()
+initialize()
 
 # if __name__ == '__main__':
 #     initialize()  # Initialize and index at startup
