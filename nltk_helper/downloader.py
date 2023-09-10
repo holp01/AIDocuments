@@ -6,10 +6,11 @@ from azurehelper import azure_manager
 
 def download_nltk_data():
     NLTK_DATA_DIR = '/home/data/nltk_data'  # Updated path
+    STOPWORDS_ZIP_PATH = os.path.join(NLTK_DATA_DIR, 'stopwords.zip')
 
     print("Checking if NLTK data directory exists...")
     # Check if NLTK data is present
-    if not os.path.exists(NLTK_DATA_DIR):
+    if not os.path.exists(NLTK_DATA_DIR) or not os.path.exists(STOPWORDS_ZIP_PATH):
         print("Creating NLTK data directory...")
         os.makedirs(NLTK_DATA_DIR, exist_ok=True)  # Using makedirs to create any necessary parent directories
         
@@ -19,16 +20,15 @@ def download_nltk_data():
         
         blob_service_client = BlobServiceClient.from_connection_string(BLOB_CONNECTION_STRING)
         blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob='stopwords.zip')
-        zip_path = os.path.join(NLTK_DATA_DIR, 'stopwords.zip')  # Using os.path.join for path compatibility
         
-        print(f"Downloading stopwords.zip to {zip_path}...")
-        with open(zip_path, 'wb') as download_file:
+        print(f"Downloading stopwords.zip to {STOPWORDS_ZIP_PATH}...")
+        with open(STOPWORDS_ZIP_PATH, 'wb') as download_file:
             data = blob_client.download_blob()
             data.readinto(download_file)
 
         # Unzip the file
         print("Unzipping stopwords.zip...")
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        with zipfile.ZipFile(STOPWORDS_ZIP_PATH, 'r') as zip_ref:
             zip_ref.extractall(NLTK_DATA_DIR)
     else:
         print("NLTK data directory already exists.")
@@ -36,6 +36,7 @@ def download_nltk_data():
     # Point NLTK to the right directory
     os.environ['NLTK_DATA'] = NLTK_DATA_DIR
     print(f"NLTK data directory set to: {NLTK_DATA_DIR}")
+
 
 def download_nltk_resources_to_blob():
     """
