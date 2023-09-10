@@ -10,11 +10,11 @@ def download_nltk_data():
     if not os.path.exists(NLTK_DATA_DIR):
         os.mkdir(NLTK_DATA_DIR)
         # Assuming you've set up Azure Blob Storage details as environment variables or elsewhere
-        AZURE_BLOB_CONNECTION_STRING = os.environ.get('AZURE_BLOB_CONNECTION_STRING')
-        BLOB_CONTAINER_NAME = os.environ.get('BLOB_CONTAINER_NAME')
+        BLOB_CONNECTION_STRING = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+        CONTAINER_NAME = os.environ.get('BLOB_CONTAINER_NAME')
         
-        blob_service_client = BlobServiceClient.from_connection_string(AZURE_BLOB_CONNECTION_STRING)
-        blob_client = blob_service_client.get_blob_client(container=BLOB_CONTAINER_NAME, blob='stopwords.zip')
+        blob_service_client = BlobServiceClient.from_connection_string(BLOB_CONNECTION_STRING)
+        blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob='stopwords.zip')
         zip_path = f"{NLTK_DATA_DIR}/stopwords.zip"
         with open(zip_path, 'wb') as download_file:
             data = blob_client.download_blob()
