@@ -6,8 +6,14 @@ import openai
 import os
 from nltk_helper import downloader
 from nltk.corpus import stopwords
+import logging
 
 app = Flask(__name__)
+
+# Enable detailed logging
+logging.basicConfig(level=logging.DEBUG)
+app.logger.setLevel(logging.DEBUG)
+
 
 @app.route('/ask', methods=['POST'])
 def ask():
@@ -91,6 +97,16 @@ def ai_response(query, context):
         return answer
     except Exception as e:
         return f"Error: {str(e)}"
+
+@app.errorhandler(500)
+def internal_error(error):
+    app.logger.error('Server Error: %s', (error))
+    return "500 error", 500
+
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    app.logger.error('Unhandled Exception: %s', (e))
+    return "500 error", 500
 
 def download_and_extract_content(topic):
     file_path = f"data/{topic}.md"
