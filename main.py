@@ -7,6 +7,7 @@ import os
 from nltk_helper import downloader
 from nltk.corpus import stopwords
 import logging
+import nltk
 
 app = Flask(__name__)
 
@@ -114,6 +115,7 @@ def download_and_extract_content(topic):
     return content
 
 def initialize():
+    nltk.data.path.append('/home/data/nltk_data')
     downloader.download_nltk_data()  # Download NLTK data at startup
 
 # Call initialize when the app starts
