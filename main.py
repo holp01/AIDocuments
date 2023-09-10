@@ -4,6 +4,8 @@ from indexing import indexer
 from pdf_extraction import extractor
 import openai
 import os
+from nltk_helper import downloader
+from nltk.corpus import stopwords
 
 app = Flask(__name__)
 
@@ -11,22 +13,26 @@ app = Flask(__name__)
 def ask():
     query = request.json.get('query')
     
-    # Step 1: Search for relevant document identifiers based on user's query
-    matching_ids = indexer.search_index(query)
+    # Remove common stopwords from the query for searching the index
+    stop_words = set(stopwords.words('english'))
+    filtered_query = ' '.join([word for word in query.split() if word.lower() not in stop_words])
+    
+    # Step 1: Search for relevant document identifiers based on the filtered query
+    matching_ids = indexer.search_index(filtered_query)
     if not matching_ids:
         return jsonify({"response": "I'm sorry, seems that the information you asked for is not present in ArquiTips! Try to rephrase please!"})
 
     # Deduplicate matching_ids
     matching_ids = list(set(matching_ids))
+    
     # Fetch and combine content of all matched documents as context 
     context = ""
     for doc_id in matching_ids:
         doc_content = azure_manager.get_cached_content(doc_id)
-        print(doc_content)
         context += doc_content + "\n\n"
 
-    # Step 2: Send the combined context and the query to your AI model
-    response = ai_response(query, context)
+    # Step 2: Send the combined context and the ORIGINAL query to your AI model
+    response = ai_response(query, context)  # Note: We're using the original query here
     
     return jsonify({"response": response})
 
@@ -93,13 +99,10 @@ def download_and_extract_content(topic):
     return content
 
 def initialize():
-    mdFiles = ["teste1", "teste2", "teste3"] ##,"124BCAnalyzegroup"
-    for mdFile in mdFiles:
-        title, content = download_and_extract_content(mdFile)
-        azure_manager.cache_content(content, mdFile)
-        indexer.update_index(title, content, mdFile)
+    downloader.download_nltk_data()  # Download NLTK data at startup
 
-# initialize()
+# Call initialize when the app starts
+initialize()
 
 # if __name__ == '__main__':
 #     initialize()  # Initialize and index at startup
