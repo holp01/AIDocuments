@@ -72,3 +72,11 @@ def list_all_md_files():
     md_files = [item['path'].split('/')[-1].replace('.md', '') for item in data['value'] if item['path'].endswith('.md')]
     print(md_files)
     return md_files
+
+def upload_file_to_blob(file_path, blob_name):
+    """
+    Upload a file to Azure Blob Storage.
+    """
+    blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob=blob_name)
+    with open(file_path, "rb") as data:
+        blob_client.upload_blob(data, overwrite=True)

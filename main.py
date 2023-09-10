@@ -67,7 +67,6 @@ def update_all():
 
     return jsonify({"status": "All files updated successfully"})
 
-
 # Set up your API key (better to use environment variables in production)
 openai_api_key = os.environ.get('OPENAI_API_KEY')  # Make sure to keep this confidential
 openai.api_key = openai_api_key
