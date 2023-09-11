@@ -122,6 +122,6 @@ def initialize():
 # Call initialize when the app starts
 initialize()
 
-if __name__ == '__main__':
-    initialize()  # Initialize and index at startup
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     initialize()  # Initialize and index at startup
+#     app.run(debug=True)
