@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import   Flask, request, jsonify
 from azurehelper import azure_manager
 from indexing import indexer
 from pdf_extraction import extractor
@@ -32,6 +32,7 @@ def ask():
     # Deduplicate matching_ids
     matching_ids = list(set(matching_ids))
     
+    print(matching_ids)
     # Fetch and combine content of all matched documents as context 
     context = ""
     for doc_id in matching_ids:
@@ -47,13 +48,13 @@ def ask():
 def update():
     arquiTip = request.json.get('arquiTip')
 
-    # Step 1: Download and extract content
-    content = azure_manager.get_cached_content(arquiTip)
-    if not content:
-        title, content = azure_manager.download_and_extract_content_from_azure(arquiTip)  # Extract from Azure Repos
-        azure_manager.cache_content_in_azure(content, arquiTip)  # Cache the content in Azure Blob Storage
+    # Step 1: Always download and extract content from Azure Repos
+    title, content = azure_manager.download_and_extract_content_from_azure(arquiTip)
 
-    # Step 2: Update the index
+    # Step 2: Cache the content in Azure Blob Storage (this will overwrite the existing content if it exists)
+    azure_manager.cache_content_in_azure(content, arquiTip)
+
+    # Step 3: Update the index
     indexer.update_index(title, content, arquiTip)
 
     return jsonify({"status": "Updated successfully"})
@@ -121,6 +122,6 @@ def initialize():
 # Call initialize when the app starts
 initialize()
 
-# if __name__ == '__main__':
-#     initialize()  # Initialize and index at startup
-#     app.run(debug=True)
+if __name__ == '__main__':
+    initialize()  # Initialize and index at startup
+    app.run(debug=True)

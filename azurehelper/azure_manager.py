@@ -32,7 +32,8 @@ def get_cached_content(post_id):
 def cache_content_in_azure(content, arquiTip):
     blob_service_client = BlobServiceClient.from_connection_string(BLOB_CONNECTION_STRING)
     blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob=f"{arquiTip}.txt")
-    blob_client.upload_blob(content, blob_type="BlockBlob")
+    blob_client.upload_blob(content, blob_type="BlockBlob", overwrite=True)
+
 
 def download_and_extract_content_from_azure(arquiTip):
     # Fetch content from Azure Repos
@@ -41,15 +42,15 @@ def download_and_extract_content_from_azure(arquiTip):
     credentials = BasicAuthentication('', personal_access_token)
     connection = Connection(base_url=organization_url, creds=credentials)
     client = connection.clients.get_git_client()
-    file_content_stream = client.get_item_text(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), path=f'{arquiTip}.md', project=os.environ.get('AZURE_DEVOPS_PROJECT'))
+    file_content_stream = client.get_item_text(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), path=f'content/blog/arqui-tips/{arquiTip}/{arquiTip}.md', project=os.environ.get('AZURE_DEVOPS_PROJECT'))
     
     # Convert generator of bytes to string
-    content = ''.join(chunk.decode('utf-8') for chunk in file_content_stream)
+    raw_content = ''.join(chunk.decode('utf-8') for chunk in file_content_stream)
     
     # Extract and preprocess content (assuming you have a function for this)
-    content = extractor.extract_from_md_content(content)
+    title, content = extractor.extract_from_md_content(raw_content)
     
-    return content
+    return title, content
 
 import requests
 
@@ -69,7 +70,7 @@ def list_all_md_files():
     response = requests.get(api_url, headers=headers)
     data = response.json()
 
-    md_files = [item['path'].split('/')[-1].replace('.md', '') for item in data['value'] if item['path'].endswith('.md')]
+    md_files = [item['path'].split('/')[-1].replace('.md', '') for item in data['value'] if item['path'].endswith('.md') and 'content/blog/arqui-tips' in item['path']]
     print(md_files)
     return md_files
 
