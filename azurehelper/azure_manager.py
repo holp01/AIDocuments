@@ -42,15 +42,15 @@ def download_and_extract_content_from_azure(arquiTip):
     credentials = BasicAuthentication('', personal_access_token)
     connection = Connection(base_url=organization_url, creds=credentials)
     client = connection.clients.get_git_client()
-    file_content_stream = client.get_item_text(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), path=f'content/blog/arqui-tips/{arquiTip}/{arquiTip}.md', project=os.environ.get('AZURE_DEVOPS_PROJECT'))
+    file_content_stream = client.get_item_text(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), path=f'content/blog/arqui-tips/{arquiTip}/index.md', project=os.environ.get('AZURE_DEVOPS_PROJECT'))
     
     # Convert generator of bytes to string
     raw_content = ''.join(chunk.decode('utf-8') for chunk in file_content_stream)
     
     # Extract and preprocess content (assuming you have a function for this)
-    title, content = extractor.extract_from_md_content(raw_content)
+    content = extractor.extract_from_md_content(raw_content)
     
-    return title, content
+    return arquiTip, content
 
 import requests
 
@@ -70,7 +70,7 @@ def list_all_md_files():
     response = requests.get(api_url, headers=headers)
     data = response.json()
 
-    md_files = [item['path'].split('/')[-1].replace('.md', '') for item in data['value'] if item['path'].endswith('.md') and 'content/blog/arqui-tips' in item['path']]
+    md_files = [item['path'].split('/')[-2] for item in data['value'] if item['path'].endswith('index.md')]
     print(md_files)
     return md_files
 

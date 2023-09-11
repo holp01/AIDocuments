@@ -68,7 +68,7 @@ def update_all():
         title, content = azure_manager.download_and_extract_content_from_azure(mdFile)
         
         # Cache the content in Azure Blob Storage
-        azure_manager.cache_content(content, mdFile)
+        azure_manager.cache_content(content, title)
         
         # Update the index
         indexer.update_index(title, content, mdFile)  # Assuming mdFile is the title here, modify if needed

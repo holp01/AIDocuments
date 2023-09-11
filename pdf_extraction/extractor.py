@@ -21,15 +21,14 @@ def extract_from_md(file_path):
 
 def extract_from_md_content(content):
     """Extract and preprocess content directly from a .md content string."""
-    title, content = split_title_and_content(content)
+    content = split_title_and_content(content)
     content = preprocess_md(content)
-    return title, content
+    return content
 
 def split_title_and_content(content):
     lines = content.split("\n")
-    title = lines[0].replace("#", "").strip()  # Assuming the title is the first line
     content = "\n".join(lines[0:])
-    return title, content
+    return content
 
 def preprocess_md(content):
     # Remove headers (e.g., #, ##, ###, etc.)
