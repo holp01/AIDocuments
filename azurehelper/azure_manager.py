@@ -56,7 +56,7 @@ def download_and_extract_content_from_azure(arquiTip):
 import requests
 
 # Set up logging
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def list_all_md_files():
     personal_access_token = os.environ.get('AZURE_DEVOPS_PAT')
@@ -70,13 +70,20 @@ def list_all_md_files():
     headers = {
         "Authorization": f"Basic {base64.b64encode((':' + personal_access_token).encode()).decode()}"
     }
-
+    
     response = requests.get(api_url, headers=headers)
+    if response.status_code != 200:
+        logging.error(f"Failed to fetch data from Azure DevOps. Status code: {response.status_code}. Response: {response.text}")
+        return []
+
     data = response.json()
 
+    # Log the entire data for inspection
+    logging.debug(f"Data from Azure DevOps: {data}")
+    
     if 'value' not in data:
         logger.error(f"Unexpected response from Azure API: {data}")
-        return []
+    return []
 
     # Filter paths and extract folder names
     md_files = []
@@ -85,7 +92,7 @@ def list_all_md_files():
             folder_name = item['path'].split('/')[-2]
             md_files.append(folder_name)
 
-    logger.debug(f"Retrieved MD files: {md_files}")
+    logging.debug(f"Retrieved MD files: {md_files}")
     return md_files
 
 def upload_file_to_blob(file_path, blob_name):
