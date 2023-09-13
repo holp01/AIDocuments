@@ -70,7 +70,13 @@ def list_all_md_files():
     response = requests.get(api_url, headers=headers)
     data = response.json()
 
-    md_files = [item['path'].split('/')[-2] for item in data['value'] if item['path'].endswith('index.md')]
+    # Filter paths and extract folder names
+    md_files = []
+    for item in data['value']:
+        if item['path'].startswith('content/blog/arqui-tips/') and item['path'].endswith('index.md'):
+            folder_name = item['path'].split('/')[-2]
+            md_files.append(folder_name)
+
     print(md_files)
     return md_files
 
