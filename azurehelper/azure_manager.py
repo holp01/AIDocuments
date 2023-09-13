@@ -56,7 +56,7 @@ def download_and_extract_content_from_azure(arquiTip):
 import requests
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def list_all_md_files():
     personal_access_token = os.environ.get('AZURE_DEVOPS_PAT')
