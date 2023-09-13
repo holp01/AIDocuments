@@ -82,7 +82,7 @@ def list_all_md_files():
     logging.debug(f"Data from Azure DevOps: {data}")
     
     if 'value' not in data:
-        logging.error(f"Unexpected response from Azure API: {data}")
+        logging.debug(f"Unexpected response from Azure API: {data}")
     return []
 
     md_files = []
