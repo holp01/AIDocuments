@@ -39,7 +39,7 @@ def search_index(query):
     with index.searcher() as searcher:
         sanitized_query = re.sub(r'[?]', '', query)  # Remove special characters like '?'
         
-        query_parser = QueryParser("content", index.schema, group=qparser.OrGroup)
+        query_parser = QueryParser("title", index.schema, group=qparser.OrGroup)
         parsed_query = query_parser.parse(sanitized_query)
         
         print("Sanitized Query:", sanitized_query)
