@@ -4,6 +4,7 @@ from azure.storage.blob import BlobServiceClient
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from pdf_extraction import extractor
+import logging
 
 # Azure Blob Storage Configuration
 BLOB_CONNECTION_STRING = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
@@ -54,6 +55,9 @@ def download_and_extract_content_from_azure(arquiTip):
 
 import requests
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def list_all_md_files():
     personal_access_token = os.environ.get('AZURE_DEVOPS_PAT')
     organization_url = os.environ.get('AZURE_DEVOPS_ORG_URL')
@@ -68,7 +72,14 @@ def list_all_md_files():
     }
 
     response = requests.get(api_url, headers=headers)
+    if response.status_code != 200:
+        logging.error(f"Failed to fetch data from Azure DevOps. Status code: {response.status_code}. Response: {response.text}")
+        return []
+
     data = response.json()
+
+    # Log the entire data for inspection
+    logging.debug(f"Data from Azure DevOps: {data}")
 
     # Filter paths and extract folder names
     md_files = []
@@ -77,7 +88,7 @@ def list_all_md_files():
             folder_name = item['path'].split('/')[-2]
             md_files.append(folder_name)
 
-    print(md_files)
+    logging.debug(f"Retrieved MD files: {md_files}")
     return md_files
 
 def upload_file_to_blob(file_path, blob_name):
