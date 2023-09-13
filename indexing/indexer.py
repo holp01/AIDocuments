@@ -5,6 +5,7 @@ from whoosh.qparser import QueryParser
 from whoosh.writing import AsyncWriter
 from whoosh import qparser
 import re
+import shutil
 
 # Define the schema for the index
 schema = Schema(id =TEXT(stored=True),title=TEXT(stored=True), content=TEXT(stored=True))
@@ -29,7 +30,7 @@ def update_index(title, content, mdFile):
     """Add new content to the index or update existing content."""
     index = create_or_open_index()
     writer = AsyncWriter(index)
-    writer.update_document(id= mdFile, title=title, content=content)
+    writer.update_document(id=mdFile, title=title, content=content)
     writer.commit()
     
 def search_index(query):
@@ -48,4 +49,9 @@ def search_index(query):
         print("Number of Hits:", len(results))
         
         return [hit["id"] for hit in results]
+
+def delete_index(index_dir=INDEX_DIR):
+    """Delete the existing index."""
+    if os.path.exists(index_dir):
+        shutil.rmtree(index_dir)
 
