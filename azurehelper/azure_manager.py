@@ -88,7 +88,14 @@ def list_all_md_files():
     md_files = []
     for item in data['value']:
         path = item['path']
-        if path.startswith('/content/blog/arqui-tips/') and path.endswith('index.md'):
+        starts_with_condition = path.startswith('/content/blog/arqui-tips/')
+        ends_with_condition = path.endswith('index.md')
+        
+        logging.debug(f"Checking path: {path}")
+        logging.debug(f"Starts with condition: {starts_with_condition}")
+        logging.debug(f"Ends with condition: {ends_with_condition}")
+    
+        if starts_with_condition and ends_with_condition:
             folder_name = path.split('/')[-2]
             md_files.append(folder_name)
             logging.debug(f"Matched path: {path}, extracted folder name: {folder_name}")
