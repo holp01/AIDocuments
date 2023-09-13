@@ -37,7 +37,7 @@ def ask():
     context = ""
     for doc_id in matching_ids:
         doc_content = azure_manager.get_cached_content(doc_id)
-        if doc_content
+        if doc_content is not None:
             context += doc_content + "\n\n"
 
     # Step 2: Send the combined context and the ORIGINAL query to your AI model
