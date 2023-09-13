@@ -83,7 +83,7 @@ def list_all_md_files():
     
     if 'value' not in data:
         logging.debug(f"Unexpected response from Azure API: {data}")
-    return []
+        return []
 
     md_files = []
     for item in data['value']:
