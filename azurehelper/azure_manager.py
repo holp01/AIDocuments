@@ -72,14 +72,11 @@ def list_all_md_files():
     }
 
     response = requests.get(api_url, headers=headers)
-    if response.status_code != 200:
-        logging.error(f"Failed to fetch data from Azure DevOps. Status code: {response.status_code}. Response: {response.text}")
-        return []
-
     data = response.json()
 
-    # Log the entire data for inspection
-    logging.debug(f"Data from Azure DevOps: {data}")
+    if 'value' not in data:
+        logger.error(f"Unexpected response from Azure API: {data}")
+        return []
 
     # Filter paths and extract folder names
     md_files = []
@@ -88,7 +85,7 @@ def list_all_md_files():
             folder_name = item['path'].split('/')[-2]
             md_files.append(folder_name)
 
-    logging.debug(f"Retrieved MD files: {md_files}")
+    logger.debug(f"Retrieved MD files: {md_files}")
     return md_files
 
 def upload_file_to_blob(file_path, blob_name):
