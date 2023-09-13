@@ -43,8 +43,13 @@ def download_and_extract_content_from_azure(arquiTip):
     credentials = BasicAuthentication('', personal_access_token)
     connection = Connection(base_url=organization_url, creds=credentials)
     client = connection.clients.get_git_client()
-    file_content_stream = client.get_item_text(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), path=f'content/blog/arqui-tips/{arquiTip}/index.md', project=os.environ.get('AZURE_DEVOPS_PROJECT'))
     
+    try:
+        file_content_stream = client.get_item_text(repository_id=os.environ.get('AZURE_DEVOPS_REPO_ID'), path=f'content/blog/arqui-tips/{arquiTip}/index.md', project=os.environ.get('AZURE_DEVOPS_PROJECT'))
+    except Exception as e:
+        logging.error(f"Error fetching content for {arquiTip}: {e}")
+        return None, None
+
     # Convert generator of bytes to string
     raw_content = ''.join(chunk.decode('utf-8') for chunk in file_content_stream)
     
