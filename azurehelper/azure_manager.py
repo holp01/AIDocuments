@@ -82,15 +82,16 @@ def list_all_md_files():
     logging.debug(f"Data from Azure DevOps: {data}")
     
     if 'value' not in data:
-        logger.error(f"Unexpected response from Azure API: {data}")
+        logging.error(f"Unexpected response from Azure API: {data}")
     return []
 
-    # Filter paths and extract folder names
     md_files = []
     for item in data['value']:
-        if item['path'].startswith('content/blog/arqui-tips/') and item['path'].endswith('index.md'):
-            folder_name = item['path'].split('/')[-2]
+        path = item['path']
+        if path.startswith('/content/blog/arqui-tips/') and path.endswith('index.md'):
+            folder_name = path.split('/')[-2]
             md_files.append(folder_name)
+            logging.debug(f"Matched path: {path}, extracted folder name: {folder_name}")
 
     logging.debug(f"Retrieved MD files: {md_files}")
     return md_files
