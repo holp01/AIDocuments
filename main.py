@@ -62,7 +62,13 @@ def update():
 
 @app.route('/update_all', methods=['POST'])
 def update_all():
+    indexer.delete_index()
+
     mdFiles = azure_manager.list_all_md_files()
+    for mdFile in mdFiles:
+        if not mdFile:  # Skip if mdFile is None
+            continue
+            
     for mdFile in mdFiles:
         print(mdFile)
         # Directly download and extract content from Azure Repos
